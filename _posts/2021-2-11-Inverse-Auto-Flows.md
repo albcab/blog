@@ -238,7 +238,7 @@ Consider an objective posterior density for $x \in \mathbb{R}^2$ s.t.
 $$
 x \sim \mathcal{N}_2\left(  \begin{bmatrix} 2 \\ -2 \end{bmatrix},  \begin{bmatrix} 2 & -1 \\ -1 & 2 \end{bmatrix} \right),
 $$
-i.e. transform ![standard normal](/images/norm_hex.png) into ![nonstandard normal](/images/normNF_hex.png)
+i.e. transform ![standard normal]({{ site.baseurl }}/images/norm_hex.png) into ![nonstandard normal]({{ site.baseurl }}/images/normNF_hex.png)
 
 ```python
 import itertools
@@ -300,4 +300,4 @@ while True:
 ```
 
 After a couple of epochs we get parameters that transform 1100 observations with mean $$\begin{bmatrix} 0.03882353 \\ 0.01266078 \end{bmatrix}$$ and covariance $$\begin{bmatrix} 0.9359905 & -0.00276474 \\ -0.00276474 & 0.9968354 \end{bmatrix}$$ to mean $$\begin{bmatrix} 2.234608 \\ -2.1736727 \end{bmatrix}$$ and covariance $$\begin{bmatrix} 1.6226339 & -0.88107896 \\ -0.88107896 & 2.2406228 \end{bmatrix}$$.
-Visually ![standard normal](/images/norm.png) to ![nonstandard normal](/images/normNF.png) :rocket:
+Visually ![standard normal]({{ site.baseurl }}/images/norm.png) to ![nonstandard normal]({{ site.baseurl }}/images/normNF.png) :rocket:
