@@ -23,7 +23,7 @@ $$
 x = f_{\phi}(u) \quad for \quad u \sim q(u).
 $$
 
-Notice that the function transforming the variable is parametrized by a vector $\phi$, our objective is to optimize this vector. The base density $q(u)$ is gaussianlly normal and it can be parametrzied by its own vector $\varphi$. However, we will assume that the transformation from a standard multivariate normal distribution to a multivariate normal with paramters $\varphi$ can be absorved by $f_{\phi}$, i.e. making $\varphi$ part of $\phi$, see [section 2.3.2](https://arxiv.org/abs/1912.02762). This way we have an approximation of our density of interest 
+Notice that the function transforming the variable is parametrized by a vector $\phi$, our objective is to optimize this vector. The base density $q(u)$ is gaussianlly normal and it can be parametrized by its own vector $\varphi$. However, we will assume that the transformation from a standard multivariate normal distribution to a multivariate normal with paramters $\varphi$ can be absorved by $f_{\phi}$, i.e. making $\varphi$ part of $\phi$, see [section 2.3.2](https://arxiv.org/abs/1912.02762). This way we have an approximation of our density of interest 
 
 $$
 q_{\phi}(x) = q(f_{\phi}^{-1}(x))\left|\det\frac{df_{\phi}}{du}(f_{\phi}^{-1}(x))\right|^{-1},
@@ -53,7 +53,7 @@ where the first equality is by definition, the second is proved in [appendix A](
 
 The main burden in deriving our approximate density is that of computing the determinant of the Jacobian matrix $\frac{df_{\phi}}{du}$ at some given value. Each transformation in the flow would require to compute and store a $d x d$ square matrix to then compute its determinant. Even for relativeley small $d$ this could be computationally expensive and for a large $d$ it might be imposible to store in memory. Solving this issue is the goal of the Inverse Autoregressive flows: the Jacobian matrix of this transformation is lower triangular, i.e. the determinant is the product of its diagonal. Again, learn it from somebody that is smarter than me: [this is the paper that introduced it](https://arxiv.org/abs/1606.04934), [this blog post](https://www.ritchievink.com/blog/2019/11/12/another-normalizing-flow-inverse-autoregressive-flows/) goes straight to the point, while [this one](https://bjlkeng.github.io/posts/variational-autoencoders-with-inverse-autoregressive-flows/) provides more detail and intution behind the idea. 
 
-The concept is simple, at each step of the flow we scale and shift each dimension of the input variable with parameters determined by previous dimensions of the input variable. Formally, given in input variable $u$ we derive the output variable $x$ of the same dimension such that
+The concept is simple, at each step of the flow we scale and shift each dimension of the input variable with parameters determined by previous dimensions of the input variable. Formally, given an input variable $u$ we derive the output variable $x$ of the same dimension such that
 
 $$
 x_i = (f_{\phi}(u))_i =  \frac{u_i - \mu_i(u_{1:i-1}, \phi)}{\sigma_i(u_{1:i-1}, \phi)} \quad i = 1,\dots,d,
@@ -105,7 +105,7 @@ for the mean. To implement the masked restrictions in code we simply feed them a
 ```
 then inside the functions we simply add the necessary zeros and we can do our linear combinations, activations and repeat until the complexity creates an intelligent being. Notice that the first layer always has zeros in the diagonals. In the same way we input the activation functions as a list `[activation_fun1, activation_fun2]` (for log scale) or a single activation function on a list `[activation_fun]` which the function will understand to mean `[activation_fun, ..., activation_fun, identity_fun]` for $h \geq 1$ (`[activation_fun1, identity_fun]` for log scale). 
 
-Thus, the (Masked) Autoregressive neural network function that calculates the mean or log scale paramters of the model:
+Thus, the (Masked) Autoregressive neural network function that calculates the mean or log scale parameters of the model:
 ```python
 def DenseAutoReg (z, parameters, activations):
     if len(activations) == 1 and len(parameters) > 1:
@@ -129,7 +129,7 @@ def DenseAutoReg (z, parameters, activations):
 
 ### Step 2: Inverse Autoregressive Flow
 
-An inverse autoregressive transformation would require as input parameters and activation functions of for both the mean and log scale.
+An inverse autoregressive transformation would require as input parameters and activation functions for both the mean and log scale.
 ```python
 def InvAutoRegFlow (z, mu_param, log_sd_param, mu_act, log_sd_act):
     mu = DenseAutoReg(z, mu_param, mu_act)
