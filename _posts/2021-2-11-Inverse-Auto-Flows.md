@@ -3,10 +3,8 @@ title: "Inverse Autoregressive (Normalizing) Flows using JAX: a MADE implementat
 layout: post
 toc: true
 comments: true
-categories: [Variational inference, Normalizing Flows, JAX]
+categories: [Variational inference, Normalizing flows, JAX]
 ---
-
-# Inverse Autoregressive (Normalizing) Flows using JAX: a MADE implementation
 
 ## Introduction
 
