@@ -37,7 +37,7 @@ $$
 \det\frac{d(f_K \circ \cdots \circ f_1)}{du}(u) = \det\frac{df_K}{du}((f_{K-1} \circ \cdots \circ f_1)(u)) \cdots \det\frac{df_1}{du}(u).
 $$
 
-Now that we know our approximation and the parameters it depends on, we can optimize them to make this new density as close as possible to $p(x)$. To do this we need a measure of distance or divergence between the two. The [Kullback-Leibler divergence](https://en.wikipedia.org/wiki/Kullback%E2%80%93Leibler_divergence) is the preferred measure in the variational inferece literature, the normalizing flows literature (for some generalizations of it see [section 2.3.4](https://arxiv.org/abs/1912.02762)) and fairly prevalent in the Bayesian nonparametric [posterior consistency](https://staff.fnwi.uva.nl/b.j.k.kleijn/NPBayes-LecNotes-2015.pdf) literature, so lets stick to that for now. It also lets us use Monte Carlo estiamtes of its integrals if we have access to samples from either $u$ or $x$, this will come in handy on the implementation. The Kullback-Leibler divergence we'll use to optimize our parameters $\phi$ can be simplified to
+Now that we know our approximation and the parameters it depends on, we can optimize them to make this new density as close as possible to $p(x)$. To do this we need a measure of distance or divergence between the two. The [Kullback-Leibler divergence](https://en.wikipedia.org/wiki/Kullback%E2%80%93Leibler_divergence) is the preferred measure in the variational inferece literature, the normalizing flows literature (for some generalizations of it see [section 2.3.4](https://arxiv.org/abs/1912.02762)) and fairly prevalent in the Bayesian nonparametric [posterior consistency](https://staff.fnwi.uva.nl/b.j.k.kleijn/NPBayes-LecNotes-2015.pdf) literature, so lets stick to that for now. It also lets us use Monte Carlo estimates of its integrals if we have access to samples from either $u$ or $x$, this will come in handy on the implementation. The Kullback-Leibler divergence we'll use to optimize our parameters $\phi$ can be simplified to
 
 $$
 KL(q_{\phi}(x) || p(x)) = \int \log \left( \frac{q_{\phi}(x)}{p(x)} \right) q_{\phi}(x)dx $$
@@ -80,6 +80,7 @@ where $\odot$ indicates element wise product, $(M_i)_ {i=1}^{h+1}$ are $d x d$ m
 ```python
 import jax.numpy as jnp
 import jax.random as rand
+from jax import vmap
 ```
 
 The objective is to build and algorithm that composes any finite number $K$ of Inverse Autoregressive transformations into a flow $f_{\phi} = f_K \circ \cdots \circ f_1\$, minimizes the Kullback-Lieber divergence between our density of interest $p(x)$ and the approximation from the flow $q_{\phi}(x)$, and efficiently transforms input observations $u$ into approximate observations $x$ with density $p(x)$.
@@ -149,7 +150,7 @@ def MakeFlow (z, parameters, activations, invert = True):
         z = InvAutoRegFlow(z, *param, *act)
         if invert:
             z = z[::-1]
-    if invert:
+    if invert and len(parameters) % 2 > 0:
         z = z[::-1]
     
     return z, log_det_jac
@@ -160,10 +161,8 @@ def MakeFlow (z, parameters, activations, invert = True):
 The integral needed to compute the Kullback-Leiber divergence (or at least the part which concerns $\phi$) is approximated by Monte Carlo, assuming that we can generate random variables with density $q(u)$.
 ```python
 def MCKLDiv (Z, parameters, activations, log_target, invert = True):
-    KL = 0.
-    for z in Z:
-        x, log_det_jac = MakeFlow(z, parameters, activations, invert)
-        KL -= log_det_jac + log_target(x)
+    X, LDJ = vmap(MakeFlow, (0, None, None, None), 0)(Z, parameters, activations, invert)
+    KL = -jnp.sum( vmap(log_target, 0, 0)(X) + LDJ )
     
     return KL/(jnp.shape(Z)[0])
 ```
